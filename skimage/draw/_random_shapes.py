@@ -171,7 +171,8 @@ SHAPE_GENERATORS = dict(
 SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
-def _generate_random_colors(num_colors, num_channels, intensity_range, random):
+def _generate_random_colors(num_colors, num_channels, intensity_range, random,
+                            exclude=()):
     """Generate an array of random colors.
 
     Parameters
@@ -206,7 +207,13 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random):
         intensity_range = intensity_range * num_channels
     colors = [random.randint(r[0], r[1]+1, size=num_colors)
               for r in intensity_range]
-    return np.transpose(colors)
+    colors = np.transpose(colors)
+    
+    if np.isin(colors, exclude).any():
+        return _generate_random_colors(num_colors, num_channels,
+                                       intensity_range, random,
+                                       exclude=exclude)
+    return colors
 
 
 def random_shapes(image_shape,

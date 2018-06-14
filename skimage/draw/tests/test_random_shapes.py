@@ -1,6 +1,7 @@
 import numpy as np
 
 from skimage.draw import random_shapes
+from skimage.draw._random_shapes import _generate_random_colors
 
 from skimage._shared import testing
 from skimage._shared.testing import expected_warnings
@@ -141,3 +142,55 @@ def test_generates_white_image_when_intensity_range_255():
                                   random_seed=42)
     assert len(labels) > 0
     assert (image == 255).all()
+
+
+def test_pick_random_colors_within_range():
+
+    random = np.random.RandomState(42)
+
+    num_colors = 1
+    num_channels = 1
+    intensity_range = (20, 20)
+    colors = _generate_random_colors(num_colors, num_channels,
+                                     intensity_range, random)
+    assert len(colors) == 1
+    assert (colors == 20).all()
+
+    num_colors = 1
+    num_channels = 2
+    intensity_range = ((20, 20), (25, 25))
+    colors = _generate_random_colors(num_colors, num_channels,
+                                     intensity_range, random)
+    assert len(colors) == 1
+    assert (colors == (20, 25)).all()
+
+    num_colors = 2
+    num_channels = 2
+    intensity_range = ((20, 20), (25, 25))
+    colors = _generate_random_colors(num_colors, num_channels,
+                                     intensity_range, random)
+    assert len(colors) == 2
+    assert (colors == (20, 25)).all()
+
+
+def test_excludes_random_colors():
+
+    random = np.random.RandomState(42)
+
+    num_colors = 1
+    num_channels = 1
+    intensity_range = (20, 21)
+    colors = _generate_random_colors(num_colors, num_channels,
+                                     intensity_range, random,
+                                     exclude=(21))
+    assert len(colors) == 1
+    assert (colors == 20).all()
+
+    num_colors = 1
+    num_channels = 2
+    intensity_range = ((20, 21), (25, 26))
+    colors = _generate_random_colors(num_colors, num_channels,
+                                     intensity_range, random,
+                                     exclude=((21, 26)))
+    assert len(colors) == 1
+    assert (colors == (20, 25)).all()
