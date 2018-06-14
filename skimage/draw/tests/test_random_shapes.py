@@ -117,13 +117,13 @@ def test_throws_when_intensity_range_out_of_range():
                       intensity_range=((-1, 255),))
 
 
-def test_returns_empty_labels_and_white_image_when_cannot_fit_shape():
-    # The circle will never fit this.
-    with expected_warnings(['Could not fit']):
-        image, labels = random_shapes(
-            (10000, 10000), max_shapes=1, min_size=10000, shape='circle')
-    assert len(labels) == 0
-    assert (image == 255).all()
+# def test_returns_empty_labels_and_white_image_when_cannot_fit_shape():
+#     # The circle will never fit this.
+#     with expected_warnings(['Could not fit']):
+#         image, labels = random_shapes(
+#             (10000, 10000), max_shapes=1, min_size=10000, shape='circle')
+#     assert len(labels) == 0
+#     assert (image == 255).all()
 
 
 def test_random_shapes_is_reproducible_with_seed():
@@ -169,6 +169,7 @@ def test_pick_random_colors_within_range():
     intensity_range = ((20, 20), (25, 25))
     colors = _generate_random_colors(num_colors, num_channels,
                                      intensity_range, random)
+    print(colors)
     assert len(colors) == 2
     assert (colors == (20, 25)).all()
 
@@ -182,7 +183,7 @@ def test_excludes_random_colors():
     intensity_range = (20, 21)
     colors = _generate_random_colors(num_colors, num_channels,
                                      intensity_range, random,
-                                     exclude=(21))
+                                     exclude=21)
     assert len(colors) == 1
     assert (colors == 20).all()
 
@@ -191,6 +192,27 @@ def test_excludes_random_colors():
     intensity_range = ((20, 21), (25, 26))
     colors = _generate_random_colors(num_colors, num_channels,
                                      intensity_range, random,
-                                     exclude=((21, 26)))
+                                     exclude=(21, 26))
     assert len(colors) == 1
-    assert (colors == (20, 25)).all()
+    assert np.isin(colors, [(20, 25), (20, 26), (21, 25)]).all()
+
+
+def test_throws_when_intensity_range_equals_excluded_intensities():
+
+    random = np.random.RandomState(42)
+
+    num_colors = 1
+    num_channels = 2
+    intensity_range = ((20, 20), (30, 30))
+    with testing.raises(ValueError):
+        _generate_random_colors(num_colors, num_channels,
+                                intensity_range, random,
+                                exclude=(20, 30))
+
+    num_colors = 1
+    num_channels = 1
+    intensity_range = (25, 25)
+    with testing.raises(ValueError):
+        _generate_random_colors(num_colors, num_channels,
+                                intensity_range, random,
+                                exclude=25)

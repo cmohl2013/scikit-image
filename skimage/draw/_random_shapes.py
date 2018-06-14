@@ -172,7 +172,7 @@ SHAPE_CHOICES = list(SHAPE_GENERATORS.values())
 
 
 def _generate_random_colors(num_colors, num_channels, intensity_range, random,
-                            exclude=()):
+                            exclude=None):
     """Generate an array of random colors.
 
     Parameters
@@ -201,15 +201,28 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
         each channel are drawn from the corresponding `intensity_range`.
 
     """
+
     if num_channels == 1:
-        intensity_range = (intensity_range, )
+        intensity_range_tpl = (intensity_range, )
     elif len(intensity_range) == 1:
-        intensity_range = intensity_range * num_channels
+        intensity_range_tpl = intensity_range * num_channels
+    else:
+        intensity_range_tpl = intensity_range
+
+    if np.diff(np.array(intensity_range_tpl)).sum() == 0:
+        # if intensity range only spans a single color
+        colors = np.array([np.array(intensity_range_tpl)[:, 0]])
+        msg = 'Intensity range spans only excluded intensity value.'
+        if (colors == exclude).all():
+            raise ValueError(msg)
+        return np.repeat(colors, num_colors, axis=0)
+
+
     colors = [random.randint(r[0], r[1]+1, size=num_colors)
-              for r in intensity_range]
+              for r in intensity_range_tpl]
     colors = np.transpose(colors)
-    
-    if np.isin(colors, exclude).any():
+
+    if np.isin(colors, exclude).all(axis=1).any():
         return _generate_random_colors(num_colors, num_channels,
                                        intensity_range, random,
                                        exclude=exclude)
