@@ -181,13 +181,17 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
         Number of colors to generate.
     num_channels : int
         Number of elements representing color.
-    intensity_range : {tuple of tuples of ints, tuple of ints}, optional
+    intensity_range : {tuple of tuples of ints, tuple of ints}
         The range of values to sample pixel values from. For grayscale images
         the format is (min, max). For multichannel - ((min, max),) if the
         ranges are equal across the channels, and
         ((min_0, max_0), ... (min_N, max_N)) if they differ.
     random : np.random.RandomState
         The random state to use for random sampling.
+    exclude : {tuple of ints, int}, optional
+        A color within the intensity_range that is excluded from
+        random sampling. For multichannel, a tuple of length num_channels is
+        required.
 
     Raises
     ------

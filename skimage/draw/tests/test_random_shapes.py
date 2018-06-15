@@ -117,13 +117,13 @@ def test_throws_when_intensity_range_out_of_range():
                       intensity_range=((-1, 255),))
 
 
-# def test_returns_empty_labels_and_white_image_when_cannot_fit_shape():
-#     # The circle will never fit this.
-#     with expected_warnings(['Could not fit']):
-#         image, labels = random_shapes(
-#             (10000, 10000), max_shapes=1, min_size=10000, shape='circle')
-#     assert len(labels) == 0
-#     assert (image == 255).all()
+def test_returns_empty_labels_and_white_image_when_cannot_fit_shape():
+    # The circle will never fit this.
+    with expected_warnings(['Could not fit']):
+        image, labels = random_shapes(
+            (10000, 10000), max_shapes=1, min_size=10000, shape='circle')
+    assert len(labels) == 0
+    assert (image == 255).all()
 
 
 def test_random_shapes_is_reproducible_with_seed():
