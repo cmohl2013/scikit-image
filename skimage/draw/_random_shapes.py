@@ -242,6 +242,7 @@ def random_shapes(image_shape,
                   num_channels=3,
                   shape=None,
                   intensity_range=None,
+                  background = None,
                   allow_overlap=False,
                   num_trials=100,
                   random_seed=None):
@@ -327,7 +328,7 @@ def random_shapes(image_shape,
         num_channels = 1
 
     if intensity_range is None:
-        intensity_range = (0, 254) if num_channels == 1 else ((0, 254), )
+        intensity_range = (0, 255) if num_channels == 1 else ((0, 255), )
     else:
         tmp = (intensity_range, ) if num_channels == 1 else intensity_range
         for intensity_pair in tmp:
@@ -336,16 +337,28 @@ def random_shapes(image_shape,
                     msg = 'Intensity range must lie within (0, 255) interval'
                     raise ValueError(msg)
 
+    if background is None:
+        background = [255] * num_channels
+    elif isinstance(background, int):
+        background = [background]
+    if len(background) != num_channels:
+        raise ValueError('Nr of background values must match nr of channels')
+    for intensity in background:
+        if not (0 <= intensity <= 255):
+            msg = 'Background intensity must lie within (0, 255) interval'
+            raise ValueError(msg)
+
     random = np.random.RandomState(random_seed)
     user_shape = shape
     image_shape = (image_shape[0], image_shape[1], num_channels)
-    image = np.ones(image_shape, dtype=np.uint8) * 255
+    image = np.ones(image_shape, dtype=np.uint8) * background
     filled = np.zeros(image_shape, dtype=bool)
     labels = []
 
     num_shapes = random.randint(min_shapes, max_shapes + 1)
     colors = _generate_random_colors(num_shapes, num_channels,
-                                     intensity_range, random)
+                                     intensity_range, random,
+                                     exclude=background)
     for shape_idx in range(num_shapes):
         if user_shape is None:
             shape_generator = random.choice(SHAPE_CHOICES)
