@@ -186,14 +186,16 @@ def test_excludes_random_colors():
     assert len(colors) == 1
     assert (colors == 20).all()
 
-    num_colors = 1
+    num_colors = 10
     num_channels = 2
     intensity_range = ((20, 21), (25, 26))
     colors = _generate_random_colors(num_colors, num_channels,
                                      intensity_range, random,
-                                     exclude=(21, 26))
-    assert len(colors) == 1
-    assert np.isin(colors, [(20, 25), (20, 26), (21, 25)]).all()
+                                     exclude=(21, 25))
+    assert len(colors) == 10
+    assert np.isin(colors, [(20, 25), (20, 26), (21, 26)]).all()
+
+    assert False
 
 
 def test_throws_when_intensity_range_equals_excluded_intensities():

@@ -221,15 +221,17 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
             raise ValueError(msg)
         return np.repeat(colors, num_colors, axis=0)
 
-
     colors = [random.randint(r[0], r[1]+1, size=num_colors)
               for r in intensity_range_tpl]
     colors = np.transpose(colors)
-
-    if np.isin(colors, exclude).all(axis=1).any():
-        return _generate_random_colors(num_colors, num_channels,
-                                       intensity_range, random,
-                                       exclude=exclude)
+    
+    to_replace = np.isin(colors, exclude).all(axis=1)
+    if to_replace.any():
+        colors[to_replace, :] = _generate_random_colors(sum(to_replace),
+                                                        num_channels,
+                                                        intensity_range,
+                                                        random,
+                                                        exclude=exclude)
     return colors
 
 
