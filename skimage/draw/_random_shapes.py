@@ -224,7 +224,7 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
     colors = [random.randint(r[0], r[1]+1, size=num_colors)
               for r in intensity_range_tpl]
     colors = np.transpose(colors)
-    
+
     to_replace = np.isin(colors, exclude).all(axis=1)
     if to_replace.any():
         colors[to_replace, :] = _generate_random_colors(sum(to_replace),
@@ -244,7 +244,7 @@ def random_shapes(image_shape,
                   num_channels=3,
                   shape=None,
                   intensity_range=None,
-                  background = None,
+                  background=None,
                   allow_overlap=False,
                   num_trials=100,
                   random_seed=None):
@@ -288,6 +288,10 @@ def random_shapes(image_shape,
         if they differ. As the function supports generation of uint8 arrays only,
         the maximum range is (0, 255). If None, set to (0, 254) for each
         channel reserving color of intensity = 255 for background.
+    background : {tuple of ints, int}, optional
+        Pixel intensities for background. Values between 0 and 255 are alloed.
+        For multichannel, a tuple of length num_channels is required. If None,
+        set to 255 for each channel.
     allow_overlap : bool, optional
         If `True`, allow shapes to overlap.
     num_trials : int, optional
