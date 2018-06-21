@@ -358,7 +358,7 @@ def random_shapes(image_shape,
     random = np.random.RandomState(random_seed)
     user_shape = shape
     image_shape = (image_shape[0], image_shape[1], num_channels)
-    image = np.ones(image_shape, dtype=np.uint8) * background
+    image = np.ones(image_shape, dtype=np.uint8) * np.uint8(background)
     filled = np.zeros(image_shape, dtype=bool)
     labels = []
 
