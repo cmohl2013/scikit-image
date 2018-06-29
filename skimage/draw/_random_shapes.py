@@ -206,24 +206,22 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
 
     """
 
-    if num_channels == 1:
-        intensity_range_tpl = (intensity_range, )
-    elif len(intensity_range) == 1:
-        intensity_range_tpl = intensity_range * num_channels
-    else:
-        intensity_range_tpl = intensity_range
+    intensity_range = np.asarray(intensity_range)
+    if intensity_range.ndim == 1:
+        intensity_range = np.broadcast_to(intensity_range, (num_channels, 2))
 
-    if np.diff(np.array(intensity_range_tpl)).sum() == 0:
+    if (np.diff(intensity_range) == 0).all():
         # if intensity range only spans a single color
-        colors = np.array([np.array(intensity_range_tpl)[:, 0]])
+        colors = np.broadcast_to(intensity_range[:, 0],
+                                 (num_colors, num_channels))
         msg = ('Shape colors can not be selected.' +
                'Intensity range spans only background value.')
-        if np.array(colors == exclude).all():
+        if exclude is not None and (colors[0, :] == exclude).all():
             raise ValueError(msg)
-        return np.repeat(colors, num_colors, axis=0)
+        return colors
 
     colors = [random.randint(r[0], r[1]+1, size=num_colors)
-              for r in intensity_range_tpl]
+              for r in intensity_range]
     colors = np.transpose(colors)
 
     to_replace = np.array([(exclude == color).all() for color in colors])
