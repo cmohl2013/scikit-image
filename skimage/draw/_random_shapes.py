@@ -216,7 +216,8 @@ def _generate_random_colors(num_colors, num_channels, intensity_range, random,
     if np.diff(np.array(intensity_range_tpl)).sum() == 0:
         # if intensity range only spans a single color
         colors = np.array([np.array(intensity_range_tpl)[:, 0]])
-        msg = 'Intensity range spans only excluded intensity value.'
+        msg = ('Shape colors can not be selected.' +
+               'Intensity range spans only background value.')
         if np.array(colors == exclude).all():
             raise ValueError(msg)
         return np.repeat(colors, num_colors, axis=0)
@@ -287,8 +288,8 @@ def random_shapes(image_shape,
         ranges are equal across the channels, and
         ((min_0, max_0), ... (min_N, max_N)) if they differ. As the function
         supports generation of uint8 arrays only, the maximum range is
-        (0, 255). If None, set to (0, 255) for each channel reserving color of
-        intensity = 255 for background.
+        (0, 255). If None, set to (0, 255) for each channel. Color of
+        background is always excluded.
     background : {tuple of ints, int}, optional
         Pixel intensities for background. Values between 0 and 255 are allowed.
         For multichannel, a tuple of length num_channels is required. If None,
@@ -328,7 +329,7 @@ def random_shapes(image_shape,
      ('triangle', ((5, 6), (13, 13)))]
     """
     if min_size > image_shape[0] or min_size > image_shape[1]:
-        raise ValueError('Minimum dimension must be less than ncols and nrows')
+        raise ValueError('Minimum dimension must be less than ncols and nrows.')
     max_size = max_size or max(image_shape[0], image_shape[1])
 
     if not multichannel:
@@ -341,7 +342,7 @@ def random_shapes(image_shape,
         for intensity_pair in tmp:
             for intensity in intensity_pair:
                 if not (0 <= intensity <= 255):
-                    msg = 'Intensity range must lie within (0, 255) interval'
+                    msg = 'Intensity range must lie within (0, 255) interval.'
                     raise ValueError(msg)
 
     if background is None:
@@ -349,10 +350,11 @@ def random_shapes(image_shape,
     elif isinstance(background, int):
         background = [background]
     if len(background) != num_channels:
-        raise ValueError('Nr of background values must match nr of channels')
+        msg = 'Number of background values must match number of channels.'
+        raise ValueError(msg)
     for intensity in background:
         if not (0 <= intensity <= 255):
-            msg = 'Background intensity must lie within (0, 255) interval'
+            msg = 'Background intensity must lie within (0, 255) interval.'
             raise ValueError(msg)
 
     random = np.random.RandomState(random_seed)
